@@ -1,0 +1,62 @@
+********************************************************************************
+* Count models - output for publication Table 3                                *
+********************************************************************************
+
+/* Variables relevant to analysis 
+
+site_id - LifeSpan intervention site; NSW coded as 5
+time - Time in quarters from baseline
+intervention - pre or post-intervention phase
+intervention1 - pre or post-intervention phase by quarter
+P - phase of intervention 
+COD - number of events 
+erp10e5_quarter - Estimated Resident Population in units of 100,000
+
+*/
+
+
+******************************************************************************************
+* MODELLING SITES 
+******************************************************************************************
+*NC (site_id=1) transition period 10 months, use 4 quarters***
+
+*other sites transition period 6 months, use 2 quarters***
+
+* model in all sites
+nbreg  COD ibn.site_id i.site_id#c.time  i.P intervention1  ,exposure(erp10e5_quarter ) noconstant nolog
+nbreg,irr
+
+
+* model in each site
+forvalues site = 1/5 {
+nbreg  COD c.time i.P intervention1 if site==`site' ,exposure(erp10e5_quarter ) nolog
+nbreg,irr
+}
+
+************************************************************************************************
+***Comparison of pre-intervention phase with aggregated intervention phase*****
+* model in all sites
+nbreg  COD ibn.site_id i.site_id#c.time  i.intervention intervention1  ,exposure(erp10e5_quarter ) noconstant nolog
+nbreg,irr
+
+
+* model in each site
+forvalues site = 1/5 {
+nbreg  COD c.time i.intervention intervention1  if site==`site' ,exposure(erp10e5_quarter ) nolog
+nbreg,irr
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

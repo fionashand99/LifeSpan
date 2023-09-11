@@ -1,0 +1,90 @@
+********************************************************************************
+* Count models - output for publication Table 3                                *
+********************************************************************************
+
+/* Variables relevant to analysis 
+
+site_id - LifeSpan intervention site; NSW coded as 5
+time - Time in quarters from baseline
+intervention - pre or post-intervention phase
+intervention1 - pre or post-intervention phase by quarter
+P - phase of intervention 
+COD - number of events 
+erp10e5_quarter - Estimated Resident Population in units of 100,000
+
+*/
+
+
+******************************************************************************************
+*EACH SITES AND REST OF NSW
+******************************************************************************************
+nbreg COD  time i.P intervention1 if site_id==1,  exposure(erp10e5_quarter) nolog
+predict pred1 if site_id==1
+gen rate_pred1=pred1/erp10e5_quarter
+
+nbreg COD  time i.P intervention1 if site_id==2,  exposure(erp10e5_quarter) nolog
+predict pred2 if site_id==2
+gen rate_pred2=pred2/erp10e5_quarter
+
+nbreg COD  time i.P intervention1 if site_id==3,  exposure(erp10e5_quarter) nolog
+predict pred3 if site_id==3
+gen rate_pred3=pred3/erp10e5_quarter
+
+nbreg COD  time i.P intervention1 if site_id==4,  exposure(erp10e5_quarter) nolog
+predict pred4 if site_id==4
+gen rate_pred4=pred4/erp10e5_quarter
+
+nbreg COD  time i.P intervention1 if site_id===5,  exposure(erp10e5_quarter) nolog
+predict pred5 if site_id==5
+gen rate_pred5=pred5/erp10e5_quarter
+
+
+
+**counterfactual**
+
+nbreg COD  time i.P intervention1 if site_id==1,  exposure(erp10e5_quarter) nolog
+predict rate_pred1,ir
+gen rate_pred1_xp=exp(_b[_cons]+_b[time]*time)
+
+nbreg COD  time i.P intervention1 if site_id==2,  exposure(erp10e5_quarter) nolog
+predict rate_pred2,ir
+gen rate_pred2_xp=exp(_b[_cons]+_b[time]*time)
+
+nbreg COD  time i.P intervention1 if site_id==3,  exposure(erp10e5_quarter) nolog
+predict rate_pred3,ir
+gen rate_pred3_xp=exp(_b[_cons]+_b[time]*time)
+
+nbreg COD  time i.P intervention1 if site_id==4,  exposure(erp10e5_quarter) nolog
+predict rate_pred4,ir
+gen rate_pred4_xp=exp(_b[_cons]+_b[time]*time)
+
+nbreg COD  time i.P intervention1 if site_id==5,  exposure(erp10e5_quarter) nolog
+predict rate_pred5,ir
+gen rate_pred5_xp=exp(_b[_cons]+_b[time]*time)
+
+
+gen rate_raw_new=COD/erp_total_new*100000
+
+
+
+**PLOT*****
+twoway///
+(line rate_raw_new time if site==1, lw(vthin) lcolor("248 227 72*0.5"))///observed
+(line rate_raw_new time if site==2, lw(vthin) lcolor("124 170 233*0.5"))///
+(line rate_raw_new time if site==3, lw(vthin) lcolor("210 172 4*0.5"))///
+(line rate_raw_new time if site==4, lw(vthin) lcolor("118 143 117*0.5"))///
+(line rate_raw_new time if site==5, lw(vthin) lcolor("153 153 153*0.5"))///
+(line rate_pred1 time if site==1 & intervention==1, lw(medthick) lcolor("248 227 72"))///intervention
+(line rate_pred2 time if site==2 & intervention==1, lw(medthick) lcolor("124 170 233"))///
+(line rate_pred3 time if site==3 & intervention==1, lw(medthick) lcolor("210 172 4"))///
+(line rate_pred4 time if site==4 & intervention==1, lw(medthick) lcolor("118 143 117"))///
+(line rate_pred1_xp time if site==1 & time>=17, lw(medium) lpattern(shortdash) lcolor("248 227 72"))///Counterfactuals
+(line rate_pred2_xp time if site==2 & time>=19, lw(medium) lpattern(shortdash) lcolor("124 170 233"))///
+(line rate_pred3_xp time if site==3 & time>=20, lw(medium) lpattern(shortdash) lcolor("210 172 4"))///
+(line rate_pred4_xp time if site==4 & time>=21, lw(medium) lpattern(shortdash) lcolor("118 143 117"))///
+(line rate_pred1 time if site==1, lw(medium) lpattern(dash) lcolor("248 227 72"))///Fitted plots
+(line rate_pred2 time if site==2, lw(medium) lpattern(dash) lcolor("124 170 233"))///
+(line rate_pred3 time if site==3, lw(medium) lpattern(dash) lcolor("210 172 4"))///
+(line rate_pred4 time if site==4, lw(medium) lpattern(dash) lcolor("118 143 117"))///
+(line rate_pred5 time if site==5, lw(medium) lpattern(dash) lcolor("153 153 153"))///
+,xtitle(Year,size(medsmall)margin(2 2 2 2))xscale(range())xmtick(##6)xtick(1(1)32) xlabel(1"2012" 5"2013" 9"2014" 13"2015" 17"2016" 21"2017" 25"2018" 29"2019" )ytitle(Suicide rate (per 100,000 person-year))yscale(range(0.)) ylabel(#6,labsize(small))bgcolor(white) graphregion(color(white)) legend(order(1 "Site 1" 2 "Site 2" 3 "Site 3" 4 "Site 4" 5 "Rest of NSW") pos(6) col(5) symxsize(*.75) size(small) region(margin(1 1 2 0) color(white) lwidth(thick)) bmargin(zero))
